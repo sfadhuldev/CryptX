@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Forge: build",
+      "type": "shell",
+      "command": "forge build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Forge: test -vv",
+      "type": "shell",
+      "command": "forge test -vv",
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Forge: clean and rebuild",
+      "type": "shell",
+      "command": "forge clean && forge build",
+      "problemMatcher": []
+    },
+    {
+      "label": "SecureCounter: start local app",
+      "type": "shell",
+      "command": "./start-local.sh",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A local, beginner-friendly dashboard for learning smart contract access control."
+    />
+    <title>SecureCounter | Local Blockchain Security Lab</title>
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="SecureCounter home">
+          <span class="brand-mark">SC</span>
+          <span class="brand-copy">
+            <span class="eyebrow">Local blockchain security lab</span>
+            <span class="brand-title">SecureCounter</span>
+          </span>
+        </a>
+
+        <div class="topbar-actions">
+          <button id="refresh-btn" class="ghost-btn" type="button">Refresh state</button>
+          <div class="network-badge" id="network-badge">
+            <span class="network-dot" id="network-dot"></span>
+            <span id="network-status">Connecting to Anvil...</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="hero-grid" aria-label="Counter dashboard">
+          <article class="panel counter-panel">
+            <div class="panel-head">
+              <div>
+                <span class="panel-kicker">Stored in the contract</span>
+                <h2>Current number</h2>
+              </div>
+              <span class="limit-pill">Limit <span id="max-value">100</span></span>
+            </div>
+
+            <div class="counter-display" aria-live="polite">
+              <span id="counter-value" class="counter-value">--</span>
+              <span class="counter-max">/ <span id="max-value-inline">100</span></span>
+            </div>
+
+            <div
+              class="progress-track"
+              role="progressbar"
+              aria-label="Counter value compared with the maximum"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              id="progress-track"
+            >
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="owner-card">
+              <div class="owner-copy">
+                <span class="field-label">Owner address</span>
+                <code id="owner-address" class="address">--</code>
+              </div>
+              <button id="copy-owner" class="ghost-btn small" type="button">Copy</button>
+            </div>
+
+            <p id="counter-note" class="muted">
+              The value begins at 0. The contract rejects any value above the limit.
+            </p>
+          </article>
+
+          <article class="panel controls-panel">
+            <div class="panel-head">
+              <div>
+                <span class="panel-kicker">Send a local transaction</span>
+                <h2>Change the number</h2>
+              </div>
+              <span class="chain-pill" id="chain-id">Chain --</span>
+            </div>
+
+            <label class="field-label" for="account-select">Acting account</label>
+            <select id="account-select" class="select" aria-describedby="account-role">
+              <option value="">Connecting...</option>
+            </select>
+
+            <div class="account-meta">
+              <span id="account-role" class="role-pill role-loading">Waiting for Anvil</span>
+              <code id="selected-address" class="address small">--</code>
+            </div>
+
+            <button id="increment-btn" class="btn btn-primary" type="button" disabled>
+              <span>Increase by 1</span>
+              <span class="btn-meta">onlyOwner</span>
+            </button>
+
+            <div class="divider"><span>or set an exact value</span></div>
+
+            <div class="set-row">
+              <label class="sr-only" for="number-input">New counter value</label>
+              <input
+                id="number-input"
+                class="input"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                max="100"
+                step="1"
+                placeholder="Value from 0 to 100"
+                disabled
+              />
+              <button id="set-btn" class="btn btn-secondary" type="button" disabled>Update</button>
+            </div>
+
+            <div id="status" class="status status-idle" role="status" aria-live="polite">
+              <span class="status-icon" aria-hidden="true"></span>
+              <span id="status-text">Connect to Anvil to begin.</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="security-grid" aria-label="Security lessons">
+          <article class="panel lesson">
+            <span class="lesson-kicker">01 / Access control</span>
+            <h3>Only the owner writes</h3>
+            <p>
+              The <code>onlyOwner</code> modifier checks <code>msg.sender</code>. Every account can
+              read the counter, but only the owner can change it.
+            </p>
+            <p class="lesson-try">Try Account #1: the transaction should be rejected.</p>
+          </article>
+
+          <article class="panel lesson">
+            <span class="lesson-kicker">02 / Input validation</span>
+            <h3>Bad values never land</h3>
+            <p>
+              <code>require(newNumber &lt;= 100)</code> runs before storage is changed. Invalid input
+              reverts, so the contract keeps its previous safe value.
+            </p>
+            <p class="lesson-try">Try setting 101 to see the rejection message.</p>
+          </article>
+
+          <article class="panel lesson">
+            <span class="lesson-kicker">03 / Audit trail</span>
+            <h3>Every change is logged</h3>
+            <p>
+              Successful calls emit <code>NumberChanged</code> with the caller, old value, and new
+              value. The event list below is read directly from the local chain.
+            </p>
+            <p class="lesson-try">Send a valid change and watch the history grow.</p>
+          </article>
+
+          <article class="panel lesson">
+            <span class="lesson-kicker">04 / Key safety</span>
+            <h3>No private keys in the browser</h3>
+            <p>
+              This page uses Anvil's unlocked development accounts. The local node signs the
+              transaction; the frontend only sends an address.
+            </p>
+            <p class="lesson-try">Local learning only. Never use real funds here.</p>
+          </article>
+        </section>
+
+        <section class="panel events-panel" aria-label="Contract event history">
+          <div class="panel-head">
+            <div>
+              <span class="panel-kicker">On-chain history</span>
+              <h2>NumberChanged events</h2>
+            </div>
+            <span class="count-pill" id="event-count">0 events</span>
+          </div>
+          <div class="events-list" id="events-list">
+            <p class="empty-state">No changes yet. The counter is still at its initial value.</p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span>Local Anvil only. No real cryptocurrency, wallets, or networks.</span>
+        <span class="footer-meta">
+          <code id="contract-address">Contract: --</code>
+          <code id="rpc-url">RPC: http://127.0.0.1:8545</code>
+        </span>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
